@@ -6,36 +6,42 @@ Created on Thu Feb 16 21:39:49 2023
 """
 import speech_recognition as sr
 from speech_recognition import Microphone, Recognizer
-from gtts import gTTS as TTS
+from gtts import gTTS
 from io import BytesIO
 import pyglet
 from time import sleep
 
-lang = 'pt-BR'
-rec = Recognizer()
 
-def text_to_speech(text):
-    with BytesIO() as mp3_fp:
-        TTS(text, lang=lang).write_to_fp(mp3_fp)
-        mp3_fp.seek(0)
-        pyglet.media.load('_.mp3', file=mp3_fp).play()
-    sleep(1)
+class VoiceBot():
+    def __init__(self, input_lang='pt-BR', output_lang='ja'):
+        self.input_lang, self.output_lang = input_lang, output_lang
+        self.STT = Recognizer()
+        self.TTS = gTTS
 
-def speech_to_text(audio):
-    # using google speech recognition
-    text = rec.recognize_google(audio_text, language=lang)
-    sleep(1)
-    return text
+    def text_to_speech(self, text):
+        with BytesIO() as mp3_fp:
+            self.TTS(text, lang=self.output_lang).write_to_fp(mp3_fp)
+            mp3_fp.seek(0)
+            pyglet.media.load('_.mp3', file=mp3_fp).play()
+        sleep(1)
 
-with Microphone() as source:
-    text_to_speech("Fale")
-    audio_text = rec.listen(source)
-    text_to_speech("Tempo acabou, obrigado")
+    def speech_to_text(self, audio):
+        text = self.STT.recognize_google(audio, language=self.input_lang)
+        sleep(1)
+        return text
     
-    try:
-        text = speech_to_text(audio_text)
-        text_to_speech("Você disse: "+text)
-    except:
-         text_to_speech("Desculpe, eu não consigo te ouvir")
+    def talk(self):
+        with Microphone() as source:
+            self.text_to_speech("Bom dia, qual o seu pedido?")
+            audio = self.STT.listen(source)
+            
+            try:
+                text = self.speech_to_text(audio)
+                self.text_to_speech("Você disse: "+text)
+            except:
+                self.text_to_speech("Desculpe, eu não consigo te ouvir")
+
+bot = VoiceBot()
+bot.talk()
 
 
