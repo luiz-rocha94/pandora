@@ -43,5 +43,3 @@ class VoiceBot():
 
 bot = VoiceBot()
 bot.talk()
-
-
